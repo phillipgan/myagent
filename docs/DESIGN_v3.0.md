@@ -1,6 +1,6 @@
 # MyAgent — 个人办公助手 Agent 高阶设计方案
 
-> **版本**: v3.0  |  **日期**: 2026-06-02  |  **作者**: Author  |  **技术栈**: Python 3.12 + FastAPI + OpenClaw Skills
+> **版本**: v3.0  |  **日期**: 2026-06-02  |  **作者**: Phillip Gan  |  **技术栈**: Python 3.12 + FastAPI + OpenClaw Skills
 
 ---
 
@@ -664,6 +664,6 @@ DEEPSEEK_API_KEY=***              # DeepSeek API
 
 ---
 
-> **设计**: MyAgent 🤖 | **审核**: Author | **日期**: 2026-06-02（v3.0）
+> **设计**: MyAgent 🤖 | **审核**: Phillip Gan | **日期**: 2026-06-02（v3.0）
 >
 > 工作目录：`~/AIspace/myagent/`

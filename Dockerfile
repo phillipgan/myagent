@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-LABEL maintainer="MyAgent"
+LABEL maintainer="Phillip Gan"
 LABEL description="MyAgent - Personal Office Assistant"
 
 WORKDIR /app

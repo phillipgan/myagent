@@ -4,7 +4,7 @@
 
 # 🤖 个人办公助手 Agent
 
-高阶设计方案 v2.7  |  2026-06-02  |  Author  |  Python + OpenClaw Skills 兼容
+高阶设计方案 v2.7  |  2026-06-02  |  Phillip Gan  |  Python + OpenClaw Skills 兼容
 
 ### 📑 目录
 
@@ -976,7 +976,7 @@ myagent/
 
 | 决策项 | 选择 | 备选 | 理由 |
 | --- | --- | --- | --- |
-| 语言 | **Python 3.11+** | Node.js | AI 生态最成熟；数据分析库丰富；[Author] 熟悉 |
+| 语言 | **Python 3.11+** | Node.js | AI 生态最成熟；数据分析库丰富；[Phillip Gan] 熟悉 |
 | LLM 接口 | **OpenAI SDK 兼容** | LangChain | 统一接口，零锁定，轻量级 |
 | 向量存储 | **sqlite-vss** | ChromaDB | 无额外服务，嵌入式，轻量 |
 | 全文搜索 | **SQLite FTS5** | Elasticsearch | 内置，零配置 |
@@ -1881,6 +1881,6 @@ V3 新增修改（15 个文件）:
 
 ⭐ v2.2 核心升级：飞书通道重构 — lark-oapi Channel + WebSocket 子进程架构
 
-设计：MyAgent 🤖 | 审核：Author | 日期：2026-06-02（v2.7）| 原始日期：2026-05-22（v2.2）
+设计：MyAgent 🤖 | 审核：Phillip Gan | 日期：2026-06-02（v2.7）| 原始日期：2026-05-22（v2.2）
 
 工作目录：~/AIspace/myagent/

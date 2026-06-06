@@ -13,6 +13,7 @@
 ## 目录
 
 - [✨ 功能特性](#-功能特性)
+- [📖 项目概述](#-项目概述)
 - [📋 环境要求](#-环境要求)
 - [🚀 快速安装](#-快速安装)
 - [⚙️ 配置说明](#️-配置说明)
@@ -41,6 +42,88 @@
 | **技能自学习** | 从复杂任务模式中自动提取新技能，供未来复用 |
 | **通道看门狗** | 子进程崩溃自动重启，指数退避策略 |
 | **生产级就绪** | systemd 服务、Docker 部署、健康检查、结构化日志 |
+
+---
+
+## 📖 项目概述
+
+> **完整设计文档**：[DESIGN_v3.0.md](docs/DESIGN_v3.0.md) | [DESIGN_v2.2.md](docs/DESIGN_v2.2.md) | [HIGH_LEVEL_DESIGN.md](docs/HIGH_LEVEL_DESIGN.md)
+
+### MyAgent 是什么？
+
+MyAgent 是一个**自托管个人办公 AI 助手**，围绕四大核心理念构建：
+
+- **OpenClaw Skills 兼容** — 原生加载 `SKILL.md` 技能文件，直接复用 OpenClaw 技能生态（300+ 社区技能）
+- **多通道接入** — CLI 终端 / 飞书 / Telegram 三通道统一接入
+- **多模型路由** — 统一路由 + FallbackChain 自动降级（GLM-5 → OpenRouter → Ollama）
+- **四层记忆** — 工作记忆(L1) → 短期记忆(L2) → 长期记忆(L3-向量库) → 用户模型(L4)
+- **安全第一** — HMAC 内部认证、路径沙箱、SSRF 防护、命令安全检查
+
+### 架构总览
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    Gateway (FastAPI)                      │
+│                   http://127.0.0.1:8765                   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │  控制台    │  │ WebSocket │  │ REST API │  │ Webhook  │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
+│  ┌───────────────────────────────────────────────────────┐│
+│  │             内部认证 (HMAC-SHA256)                      ││
+│  └───────────────────────────────────────────────────────┘│
+└──────────┬──────────────┬──────────────┬─────────────────┘
+           │              │              │
+    ┌──────┴──────┐ ┌─────┴─────┐ ┌─────┴─────┐
+    │   飞书       │ │  Telegram  │ │   CLI     │
+    │   子进程     │ │   子进程   │ │  (主进程)  │
+    │  lark-oapi  │ │  aiogram   │ │  Rich TUI │
+    │  WebSocket  │ │  Polling   │ │           │
+    └──────┬──────┘ └─────┬─────┘ └─────┬─────┘
+           └──────┬───────┴──────────────┘
+                  │ HTTP 回调
+           ┌──────┴──────┐
+           │    Agent     │
+           │  编排器       │
+           │  (ReAct)     │
+           ├──────────────┤
+           │  LLM 路由器   │──→ zai/glm-5.1（默认）
+           │  + 自动降级   │──→ openrouter/auto
+           │              │──→ ollama/qwen3.5:4b
+           │  12 个工具    │──→ exec/read/write/search...
+           │  四层记忆     │──→ L1+L2+L3+L4
+           │  303 个技能   │──→ OpenClaw 兼容
+           │  自学习       │──→ 自动技能提取
+           └──────────────┘
+```
+
+飞书和 Telegram 通道采用「**子进程隔离 + HTTP 回调主进程**」模式：SDK 阻塞调用不会冻结主进程事件循环，SDK 崩溃不会影响整体服务。
+
+### 核心模块
+
+| 模块 | 文件 | 职责 |
+|------|------|------|
+| **AgentOrchestrator** | `src/agent/orchestrator.py` | ReAct 循环（最多 60 轮）+ 记忆注入 + 技能目录注入。总超时保护。保留最近 20 条对话历史。 |
+| **TaskPlanner** | `src/agent/planner.py` | 将复杂任务分解为 2-5 个子步骤，每个步骤指定使用哪个工具。健壮的 JSON 解析。 |
+| **SubAgent** | `src/agent/subagent.py` | 独立轻量 Agent，执行特定子任务（最多 5 轮）。支持并行多 Agent 执行 + LLM 聚合。 |
+| **IntentClassifier** | `src/agent/intent.py` | 基于关键词的意图分类，支持 10 种：邮件、日历、天气、搜索、翻译、数据分析、新闻、金融、文件、闲聊。 |
+| **LLMRouter** | `src/llm/router.py` | 解析 `provider/model` 引用，路由到正确的提供商，失败时自动降级。 |
+| **FallbackChain** | `src/llm/fallback.py` | 自动降级链：`glm-5.1` → `openrouter/auto` → `ollama/qwen3.5:4b`。每个模型 3 次机会后跳过。 |
+
+### 技术栈
+
+| 组件 | 技术 | 版本 |
+|------|------|------|
+| 语言 | Python | 3.11+ |
+| Web 框架 | FastAPI + Uvicorn | 0.110+ |
+| LLM SDK | OpenAI Python SDK (AsyncOpenAI) | 1.0+ |
+| 飞书 SDK | lark-oapi | 1.6+ |
+| Telegram SDK | aiogram | 3.15+ |
+| 数据库 | SQLite + FTS5 + sqlite-vec | 内置 |
+| HTTP 客户端 | httpx | 0.27+ |
+| 配置 | YAML + .env | PyYAML |
+| 终端 UI | Rich + prompt_toolkit | 13.0+ |
+
+> 📐 完整架构设计、安全分析与技术决策详见 [高阶设计方案](docs/DESIGN_v3.0.md)。
 
 ---
 

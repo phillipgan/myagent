@@ -15,6 +15,7 @@ ReAct Agent Loop · OpenClaw Skills Compatible · Multi-Channel Messaging · Fou
 ## Table of Contents
 
 - [✨ Features](#-features)
+- [📖 Project Overview](#-project-overview)
 - [📋 Prerequisites](#-prerequisites)
 - [🚀 Quick Start](#-quick-start)
 - [⚙️ Configuration](#️-configuration)
@@ -43,6 +44,88 @@ ReAct Agent Loop · OpenClaw Skills Compatible · Multi-Channel Messaging · Fou
 | **Skill Auto-Learning** | Automatically extracts new skills from complex task patterns |
 | **Channel Watchdog** | Auto-restart crashed channels with exponential backoff |
 | **Production Ready** | systemd service, Docker support, health checks, structured logging |
+
+---
+
+## 📖 Project Overview
+
+> **Full design document**: [DESIGN_v3.0.md](docs/DESIGN_v3.0.md) | [DESIGN_v2.2.md](docs/DESIGN_v2.2.md) | [HIGH_LEVEL_DESIGN.md](docs/HIGH_LEVEL_DESIGN.md)
+
+### What is MyAgent?
+
+MyAgent is a **self-hosted personal office AI assistant** built around four core principles:
+
+- **OpenClaw Skills Compatible** — Natively loads `SKILL.md` skill files, directly reusing the OpenClaw skills ecosystem (300+ community skills)
+- **Multi-Channel** — Unified access via CLI terminal, Feishu (飞书/Lark), and Telegram
+- **Multi-Model** — Unified routing + automatic FallbackChain degradation (GLM-5 → OpenRouter → Ollama)
+- **Four-Layer Memory** — Working memory (L1) → Episodic (L2) → Semantic vector DB (L3) → User profile (L4)
+- **Security First** — HMAC internal auth, path sandbox, SSRF protection, command safety checks
+
+### Architecture at a Glance
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    Gateway (FastAPI)                      │
+│                   http://127.0.0.1:8765                   │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐ │
+│  │ Dashboard │  │ WebSocket│  │ REST API │  │ Webhook  │ │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘ │
+│  ┌───────────────────────────────────────────────────────┐│
+│  │              Internal Auth (HMAC-SHA256)               ││
+│  └───────────────────────────────────────────────────────┘│
+└──────────┬──────────────┬──────────────┬─────────────────┘
+           │              │              │
+    ┌──────┴──────┐ ┌─────┴─────┐ ┌─────┴─────┐
+    │  Feishu     │ │  Telegram  │ │   CLI     │
+    │  subprocess │ │  subprocess│ │  (main)   │
+    │ lark-oapi   │ │  aiogram   │ │  Rich TUI │
+    │  WebSocket  │ │  Polling   │ │           │
+    └──────┬──────┘ └─────┬─────┘ └─────┬─────┘
+           └──────┬───────┴──────────────┘
+                  │ HTTP callback
+           ┌──────┴──────┐
+           │    Agent     │
+           │ Orchestrator │
+           │   (ReAct)    │
+           ├──────────────┤
+           │  LLM Router   │──→ zai/glm-5.1 (default)
+           │  + Fallback   │──→ openrouter/auto
+           │              │──→ ollama/qwen3.5:4b
+           │  12 Tools    │──→ exec/read/write/search...
+           │  4-Layer Mem │──→ L1+L2+L3+L4
+           │  303 Skills  │──→ OpenClaw compatible
+           │  Learner     │──→ Auto skill extraction
+           └──────────────┘
+```
+
+Feishu and Telegram channels use a **subprocess isolation + HTTP callback** pattern: SDK blocking calls won't freeze the main event loop, and SDK crashes won't affect the overall service.
+
+### Core Modules
+
+| Module | File | Responsibility |
+|--------|------|----------------|
+| **AgentOrchestrator** | `src/agent/orchestrator.py` | ReAct loop (up to 60 iterations) + memory injection + skill catalog injection. Total timeout protection. 20-message conversation window. |
+| **TaskPlanner** | `src/agent/planner.py` | Decomposes complex tasks into 2-5 sub-steps, each specifying which tool to use. Robust JSON parsing. |
+| **SubAgent** | `src/agent/subagent.py` | Lightweight independent agent for specific subtasks (max 5 rounds each). Supports parallel multi-agent execution with LLM aggregation. |
+| **IntentClassifier** | `src/agent/intent.py` | Keyword-based intent classification supporting 10 types: email, calendar, weather, search, translate, data analysis, news, finance, file, chat. |
+| **LLMRouter** | `src/llm/router.py` | Parses `provider/model` references, routes to the correct provider, auto-degrades on failure. |
+| **FallbackChain** | `src/llm/fallback.py` | Automatic degradation chain: `glm-5.1` → `openrouter/auto` → `ollama/qwen3.5:4b`. Each model gets 3 strikes before being skipped. |
+
+### Technology Stack
+
+| Component | Technology | Version |
+|------|------|------|
+| Language | Python | 3.11+ |
+| Web Framework | FastAPI + Uvicorn | 0.110+ |
+| LLM SDK | OpenAI Python SDK (AsyncOpenAI) | 1.0+ |
+| Feishu SDK | lark-oapi | 1.6+ |
+| Telegram SDK | aiogram | 3.15+ |
+| Database | SQLite + FTS5 + sqlite-vec | Built-in |
+| HTTP Client | httpx | 0.27+ |
+| Config | YAML + .env | PyYAML |
+| Terminal UI | Rich + prompt_toolkit | 13.0+ |
+
+> 📐 For complete architectural details, security analysis, and design rationale, see the [High-Level Design Document](docs/DESIGN_v3.0.md).
 
 ---
 
