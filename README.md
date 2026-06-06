@@ -49,7 +49,7 @@ ReAct Agent Loop · OpenClaw Skills Compatible · Multi-Channel Messaging · Fou
 
 ## 📖 Project Overview
 
-> **Full design document**: [DESIGN_v3.0.md](docs/DESIGN_v3.0.md) | [DESIGN_v2.2.md](docs/DESIGN_v2.2.md) | [HIGH_LEVEL_DESIGN.md](docs/HIGH_LEVEL_DESIGN.md)
+> **Full design document**: [HIGH_LEVEL_DESIGN.md](docs/HIGH_LEVEL_DESIGN.md) | [HIGH_LEVEL_DESIGN_CN.md](docs/HIGH_LEVEL_DESIGN_CN.md)
 
 ### What is MyAgent?
 
@@ -125,7 +125,7 @@ Feishu and Telegram channels use a **subprocess isolation + HTTP callback** patt
 | Config | YAML + .env | PyYAML |
 | Terminal UI | Rich + prompt_toolkit | 13.0+ |
 
-> 📐 For complete architectural details, security analysis, and design rationale, see the [High-Level Design Document](docs/DESIGN_v3.0.md).
+> 📐 For complete architectural details, security analysis, and design rationale, see the [High-Level Design Document](docs/HIGH_LEVEL_DESIGN.md).
 
 ---
 

@@ -47,7 +47,7 @@
 
 ## 📖 项目概述
 
-> **完整设计文档**：[DESIGN_v3.0.md](docs/DESIGN_v3.0.md) | [DESIGN_v2.2.md](docs/DESIGN_v2.2.md) | [HIGH_LEVEL_DESIGN.md](docs/HIGH_LEVEL_DESIGN.md)
+> **完整设计文档**：[高阶设计方案](docs/DESIGN_v3.0.md) | [高阶设计方案 v2.2](docs/DESIGN_v2.2.md) | [高阶设计方案(HTML)](docs/HIGH_LEVEL_DESIGN_CN.md)
 
 ### MyAgent 是什么？
 
