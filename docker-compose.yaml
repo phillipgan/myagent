@@ -1,0 +1,26 @@
+services:
+  myagent:
+    build: .
+    container_name: myagent
+    ports:
+      - "5196:5196"
+    volumes:
+      - ./config:/app/config
+      - ./workspace:/app/workspace
+      # 项目自带技能（开箱即用）/ Bundled skills (out-of-the-box)
+      - ./skills:/app/skills
+      # OpenClaw 技能（如宿主机已安装，取消注释即可启用）/ OpenClaw skills (uncomment if installed)
+      # - ~/.openclaw/workspace/skills:/root/.openclaw/workspace/skills:ro
+      # - ~/.npm-global/lib/node_modules/openclaw/skills:/root/.npm-global/lib/node_modules/openclaw/skills:ro
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Dubai
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5196/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# myagent-data volume removed — workspace is now a bind mount to ./workspace directory

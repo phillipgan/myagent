@@ -1,0 +1,20 @@
+[Unit]
+Description=MyAgent Gateway - Personal Office Assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+WorkingDirectory=/opt/myagent
+ExecStart=/usr/bin/python3 -m src.main gateway --port 5196 --log INFO
+Restart=on-failure
+RestartSec=10
+
+# 环境变量 / Environment variables
+Environment=PYTHONPATH=/opt/myagent
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/opt/myagent/.env
+
+[Install]
+WantedBy=multi-user.target

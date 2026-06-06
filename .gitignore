@@ -1,0 +1,43 @@
+# 环境变量 / Environment variables
+.env
+
+# Python 缓存 / Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# 数据库 / Databases
+*.db
+
+# 日志 / Logs
+*.log
+
+# 密钥与证书 / Keys & Certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+credentials.json
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# workspace 运行时数据 / workspace runtime data
+workspace/*
+!workspace/.gitkeep
+!workspace/**/.gitkeep
+!workspace/.gitignore
+
+# OS 文件 / OS files
+.DS_Store
+Thumbs.db

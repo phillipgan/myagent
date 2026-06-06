@@ -1,0 +1,91 @@
+# MyAgent 默认配置 / Default Configuration
+
+agent:
+  name: "MyAgent"
+  description: "个人办公助手 / Personal Office Assistant"
+  workspace: "./workspace"  # 项目内工作目录 / Project-local workspace directory
+  
+  # OpenClaw Skills Compatible 技能目录（按优先级从高到低）/ OpenClaw Skills Compatible directories (by priority, high to low)
+  # 项目自带技能目录优先级最高 / Bundled skills have highest priority
+  # OpenClaw 路径在非容器环境下自动生效 / OpenClaw paths auto-active outside containers
+  skill_roots:
+    - "./skills"                                    # 项目自带技能 / Bundled skills (highest priority)
+    - "~/.openclaw/workspace/skills"                # OpenClaw 社区技能 / OpenClaw community skills
+    - "~/.openclaw/workspace/.agents/skills"        # OpenClaw agent 技能 / OpenClaw agent skills
+    - "~/.agents/skills"                             # 个人 agent 技能 / Personal agent skills
+    - "~/.openclaw/skills"                          # OpenClaw 管理的技能 / OpenClaw managed skills
+    - "~/.npm-global/lib/node_modules/openclaw/skills"  # OpenClaw 内置技能 / OpenClaw built-in skills
+  
+  # Agent 行为 / Agent behavior
+  max_iterations: 60       # ReAct 最大迭代次数 / Max ReAct iterations (complex tasks need multi-step tool calls)
+  default_timeout: 30      # 工具执行超时（秒）/ Tool execution timeout (seconds)
+
+models:
+  # 默认模型 / Default model
+  default: "zai/glm-5.1"
+  
+  # 路由表 / Routing table
+  routes:
+    chat: "zai/glm-5.1"
+    code: "deepseek/deepseek-coder"
+    analysis: "ollama/qwen3.6:35b"
+    research: "google/gemini-2.5-pro"
+    translation: "ollama/qwen3.6:27b"
+    classification: "ollama/qwen3.5:4b"
+
+# LLM 提供商配置 / LLM provider configuration
+providers:
+  ollama:
+    base_url: "http://localhost:11434/v1"
+    api_key: "ollama"
+  
+  zai:
+    base_url: "https://api.z.ai/api/coding/paas/v4"
+    api_key: "${ZAI_API_KEY}"
+    model: "glm-5.1"
+  
+  deepseek:
+    base_url: "https://api.deepseek.com/v1"
+    api_key: "${DEEPSEEK_API_KEY}"
+  
+  google:
+    api_key: "${GOOGLE_API_KEY}"
+  
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+
+channels:
+  feishu:
+    enabled: true
+    app_id: "${FEISHU_APP_ID}"
+    app_secret: "${FEISHU_APP_SECRET}"
+    verification_token: ""
+    encrypt_key: ""
+  
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    admin_ids: ""          # 管理员 Telegram user ID / Admin Telegram user IDs, comma-separated
+    allowed_groups: ""    # 允许的群组 chat ID / Allowed group chat IDs, comma-separated
+
+  watchdog:
+    enabled: true            # 是否启用通道看门狗 / Enable channel watchdog
+    check_interval: 1800     # 检测间隔（秒）/ Check interval (seconds, default 30 min)
+    max_retries: 5           # 单通道最大连续重试次数 / Max consecutive retries per channel
+    backoff_base: 60         # 退避基数（秒）/ Backoff base (seconds), retry N interval = base × 2^(N-1)
+    backoff_max: 3600        # 最大退避间隔（秒）/ Max backoff interval (seconds)
+
+memory:
+  db_path: "./workspace/memory/semantic/vectors.db"
+  episodic_dir: "./workspace/memory/episodic"
+  core_dir: "./workspace/memory/core"
+  retention_days: 7
+  embedding_model: "bge-m3"
+
+scheduler:
+  enabled: false
+  timezone: "Asia/Dubai"
+
+logging:
+  level: "INFO"
+  file: "./workspace/logs/myagent.log"
