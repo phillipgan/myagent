@@ -1,3 +1,5 @@
+**English** | [中文](README_CN.md)
+
 # 🤖 MyAgent
 
 **A self-hosted personal office assistant powered by LLMs.**

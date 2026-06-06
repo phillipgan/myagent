@@ -1,3 +1,5 @@
+[English](README.md) | **中文**
+
 # 🤖 MyAgent — 自托管个人办公 AI 助手
 
 **ReAct 智能体循环 · OpenClaw Skills 兼容 · 多通道消息 · 四层记忆系统 · 可扩展工具集**
